@@ -1,65 +1,162 @@
+@import url("https://cdn.jsdelivr.net/npm/@fontsource-variable/strichpunkt-sans/index.min.css");
+@import url("https://cdn.jsdelivr.net/fontsource/css/strichpunkt-sans:vf@latest/index.css");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #090d16;
-  --foreground: #f1f5f9;
-  --card-bg: #111827;
-  --card-border: #1f293d;
-  --accent-emerald: #10b981;
-  --accent-indigo: #6366f1;
+@layer base {
+  :root {
+    /* Modo Claro: Base Bege Suave, Branco e Preto */
+    --background: 38 30% 97%;       /* #faf8f5 - bege claro acolhedor */
+    --foreground: 20 14% 10%;       /* #181513 - preto suave/carvão */
+
+    --card: 0 0% 100%;             /* #ffffff - branco puro */
+    --card-foreground: 20 14% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 10%;
+
+    --primary: 20 14% 12%;          /* #1c1917 - preto elegante */
+    --primary-foreground: 38 30% 98%;
+
+    --secondary: 38 22% 92%;        /* #eee9dd - bege suave */
+    --secondary-foreground: 20 14% 15%;
+
+    --muted: 38 20% 93%;
+    --muted-foreground: 25 8% 46%;   /* #79736c */
+
+    --accent: 38 25% 90%;
+    --accent-foreground: 20 14% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 38 20% 88%;           /* #e4ded3 - borda bege quente */
+    --input: 38 20% 88%;
+    --ring: 20 14% 20%;
+
+    --radius: 1.25rem;
+
+    /* Bons Preços: Verde Esmeralda Vibrante */
+    --success: 158 75% 36%;         /* #059669 */
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 152 76% 96%;  /* #ecfdf5 */
+    --success-border: 156 72% 80%;  /* #a7f3d0 */
+
+    /* Preços Ruins / Alertas: Vermelho */
+    --danger: 0 84% 56%;           /* #dc2626 */
+    --danger-foreground: 0 0% 100%;
+    --danger-subtle: 0 86% 97%;     /* #fef2f2 */
+    --danger-border: 0 93% 86%;     /* #fecaca */
+  }
+
+  .dark {
+    /* Modo Escuro: Base Preto Profundo, Grafite e Bege Suave */
+    --background: 240 6% 7%;        /* #111113 - preto profundo e aveludado */
+    --foreground: 38 20% 95%;       /* #f7f5ef - off-white bege suave */
+
+    --card: 240 5% 11%;            /* #1a1a1e - superfície grafite suave */
+    --card-foreground: 38 20% 95%;
+
+    --popover: 240 5% 11%;
+    --popover-foreground: 38 20% 95%;
+
+    --primary: 38 30% 95%;          /* #f8f5ee - bege marfim luminoso */
+    --primary-foreground: 20 14% 10%;
+
+    --secondary: 240 4% 16%;        /* #27272b */
+    --secondary-foreground: 38 20% 92%;
+
+    --muted: 240 4% 16%;
+    --muted-foreground: 30 6% 64%;   /* #a5a29c */
+
+    --accent: 240 4% 18%;
+    --accent-foreground: 38 20% 96%;
+
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 4% 20%;           /* #323238 - borda sutil */
+    --input: 240 4% 20%;
+    --ring: 38 30% 80%;
+
+    /* Bons Preços: Verde Esmeralda Reluzente no Dark */
+    --success: 155 75% 44%;         /* #10b981 */
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 155 80% 12%;  /* #043625 */
+    --success-border: 155 70% 25%;  /* #065f46 */
+
+    /* Preços Ruins / Alertas no Dark: Vermelho Rubi Suave */
+    --danger: 0 84% 65%;           /* #f87171 */
+    --danger-foreground: 0 0% 100%;
+    --danger-subtle: 0 80% 14%;     /* #450a0a */
+    --danger-border: 0 72% 28%;     /* #7f1d1d */
+  }
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    font-family: "Strichpunkt Sans Variable", "Strichpunkt Sans", "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    @apply bg-background text-foreground antialiased transition-colors duration-300;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4, h5, h6, input, button, select, textarea {
+    font-family: inherit;
+  }
 }
 
-/* Glassmorphism utilities */
-.glass-panel {
-  background: rgba(17, 24, 39, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Glassmorphism Suave e Arredondado */
+.glass-header {
+  background: hsla(var(--background) / 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid hsla(var(--border) / 0.8);
 }
 
-.glass-card {
-  background: rgba(19, 29, 49, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+.glass-floating {
+  background: hsla(var(--card) / 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsla(var(--border) / 0.85);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Custom smooth scrollbar */
+/* Custom Scrollbar Elegante */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: hsl(var(--background));
 }
 ::-webkit-scrollbar-thumb {
-  background: #1f293d;
+  background: hsl(var(--muted-foreground) / 0.3);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Pulse glow animations */
-@keyframes pulseGlow {
+/* Animação de Destaque Verde para Bons Preços */
+@keyframes goodPriceGlow {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 8px 24px -4px hsla(var(--success) / 0.28), 0 0 0 1px hsla(var(--success) / 0.4);
   }
   50% {
-    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+    box-shadow: 0 12px 32px -2px hsla(var(--success) / 0.45), 0 0 0 2px hsla(var(--success) / 0.7);
   }
 }
 
-.glow-emerald {
-  animation: pulseGlow 2.5s infinite ease-in-out;
+.glow-best-price {
+  animation: goodPriceGlow 3s infinite ease-in-out;
 }

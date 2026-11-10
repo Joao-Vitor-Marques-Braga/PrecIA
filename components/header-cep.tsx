@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { MapPin, CheckCircle2, Sparkles, AlertCircle, Bell, User, LogOut } from "lucide-react";
 import { cepRegex } from "@/lib/validations";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface HeaderCepProps {
   cep: string;
@@ -23,11 +26,9 @@ export function HeaderCep({
   currentUser,
   onLogout,
 }: HeaderCepProps) {
-  const [isEditing, setIsEditing] = useState(false);
   const [inputVal, setInputVal] = useState(cep);
 
   useEffect(() => {
-    // Carrega CEP do localStorage se disponível
     const savedCep = localStorage.getItem("precia_user_cep");
     if (savedCep && cepRegex.test(savedCep)) {
       onCepChange(savedCep);
@@ -55,95 +56,103 @@ export function HeaderCep({
   const isValid = cepRegex.test(inputVal);
 
   return (
-    <header className="sticky top-0 z-30 w-full glass-panel border-b border-slate-800/80 px-3 sm:px-4 py-2.5 sm:py-3">
+    <header className="sticky top-0 z-30 w-full glass-header px-3 sm:px-5 py-3 shadow-soft transition-colors">
       <div className="max-w-3xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
         {/* Logo & Marca */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Sparkles className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-md shadow-foreground/10 transition-transform hover:scale-105">
+            <Sparkles className="w-4 h-4 text-background" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-bold text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-200 bg-clip-text text-transparent">
-                Prec<span className="text-indigo-400">IA</span>
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-foreground">
+                Prec<span className="text-muted-foreground font-semibold">IA</span>
               </span>
-              <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                PWA
-              </span>
+              <Badge variant="beige" className="text-[10px] uppercase tracking-wider py-0 px-2 font-bold">
+                Omnichannel
+              </Badge>
             </div>
-            <p className="text-[10px] text-slate-400 hidden sm:block">
-              Comparador Omnichannel & Alertas
+            <p className="text-[10px] text-muted-foreground hidden sm:block font-medium">
+              Comparador com IA & Radar de Ofertas
             </p>
           </div>
         </div>
 
-        {/* Lado Direito: CEP + Botão Alertas + Botão Auth */}
-        <div className="flex items-center gap-2">
+        {/* Lado Direito: CEP + Tema + Alertas + Auth */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Seletor / Input de CEP */}
-          <div className="flex items-center gap-1 bg-slate-900/90 border border-slate-700/80 rounded-full px-2.5 py-1 text-xs focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
-            <MapPin className={`w-3.5 h-3.5 ${isValid ? "text-emerald-400" : "text-amber-400"}`} />
+          <div className="flex items-center gap-1.5 bg-card border border-border/80 rounded-full px-3 py-1.5 text-xs shadow-soft transition-all focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/20">
+            <MapPin className={`w-3.5 h-3.5 ${isValid ? "text-success" : "text-amber-500"}`} />
             <input
               type="text"
               inputMode="numeric"
               placeholder="00000-000"
               value={inputVal}
               onChange={handleInputChange}
-              onFocus={() => setIsEditing(true)}
-              onBlur={() => setIsEditing(false)}
-              className="bg-transparent text-slate-200 font-mono w-16 sm:w-20 focus:outline-none placeholder:text-slate-500 text-xs"
+              className="bg-transparent text-foreground font-mono w-16 sm:w-20 focus:outline-none placeholder:text-muted-foreground/70 text-xs font-semibold"
               maxLength={9}
-              title="Digite seu CEP para cálculo de frete"
+              title="Digite seu CEP para frete dinâmico"
             />
             {isValid ? (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-success" />
             ) : (
-              <AlertCircle className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <AlertCircle className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
             )}
           </div>
 
+          {/* Alternância de Modo Claro e Escuro */}
+          <ThemeToggle />
+
           {/* Botão de Alertas / Monitorados */}
           {onOpenMonitored && (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-sm"
               onClick={onOpenMonitored}
               title="Ver produtos monitorados"
-              className="relative p-2 rounded-full bg-slate-900 border border-slate-700/80 hover:bg-slate-800 text-slate-300 transition-colors"
+              className="relative rounded-full border-border/80 bg-card hover:bg-accent shadow-sm"
             >
-              <Bell className="w-3.5 h-3.5" />
+              <Bell className="w-4 h-4 text-foreground" />
               {monitoredCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-[10px] font-bold text-white flex items-center justify-center shadow-md">
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-success text-[10px] font-bold text-success-foreground flex items-center justify-center shadow-md animate-in zoom-in-50">
                   {monitoredCount}
                 </span>
               )}
-            </button>
+            </Button>
           )}
 
           {/* Botão de Usuário / Auth */}
           {currentUser ? (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-indigo-300 font-medium hidden md:inline px-2 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <span className="text-xs text-foreground font-semibold hidden md:inline px-3 py-1 rounded-full bg-secondary border border-border">
                 {currentUser.user_metadata?.full_name || currentUser.email?.split("@")[0]}
               </span>
               {onLogout && (
-                <button
+                <Button
+                  variant="outline"
+                  size="icon-sm"
                   onClick={onLogout}
                   title="Sair da conta"
-                  className="p-2 rounded-full bg-slate-900 border border-slate-700/80 hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors"
+                  className="rounded-full border-border/80 hover:bg-danger/10 hover:text-danger hover:border-danger/30"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               )}
             </div>
           ) : (
             onOpenAuth && (
-              <button
+              <Button
                 type="button"
+                variant="default"
+                size="sm"
                 onClick={onOpenAuth}
                 title="Entrar ou Cadastrar"
-                className="p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition-colors"
+                className="rounded-full shadow-md px-3.5 h-9 font-semibold gap-1.5"
               >
                 <User className="w-3.5 h-3.5" />
-              </button>
+                <span className="hidden sm:inline">Entrar</span>
+              </Button>
             )
           )}
         </div>

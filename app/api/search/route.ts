@@ -10,6 +10,7 @@ export interface StoreOffer {
   imageUrl: string;
   showcasePrice: number;       // Preço parcelado / vitrine
   pixPrice: number;            // Preço com desconto PIX
+  pixDiscountPercent?: number; // % real de desconto no PIX de cada loja
   shippingCost: number;        // Frete calculado para o CEP
   freeShipping: boolean;
   effectivePrice: number;      // pixPrice + shippingCost
@@ -17,6 +18,40 @@ export interface StoreOffer {
   inStock: boolean;
   deliveryDays: number;
   isBestPrice: boolean;
+}
+
+/**
+ * Retorna a política real de desconto no PIX por varejista:
+ * - Amazon: 5% à vista no Pix / NuPay (ou 0% se já estiver no valor promocional)
+ * - Mercado Livre: 0% (o valor de vitrine já é o valor final à vista)
+ * - KaBuM!: 10% de desconto à vista
+ * - Magalu: 10% à vista no Pix
+ * - Casas Bahia / Ponto / Extra: 5% a 10%
+ * - Fast Shop: 5% no Pix
+ * - Outros varejistas: 5% padrão conservador
+ */
+function getStorePixDiscountRate(storeName: string): number {
+  const normalized = (storeName || "").toLowerCase();
+
+  if (normalized.includes("mercado livre") || normalized.includes("mercadolivre")) {
+    return 0; // Mercado Livre não oferece desconto percentual extra no PIX
+  }
+  if (normalized.includes("amazon")) {
+    return 0.05; // Amazon aplica exatamente 5% no PIX/NuPay
+  }
+  if (normalized.includes("kabum")) {
+    return 0.10; // KaBuM! tradicional 10%
+  }
+  if (normalized.includes("magalu") || normalized.includes("magazine luiza")) {
+    return 0.10; // Magalu geralmente oferece 10% no PIX
+  }
+  if (normalized.includes("casas bahia") || normalized.includes("ponto") || normalized.includes("extra")) {
+    return 0.05;
+  }
+  if (normalized.includes("fast shop") || normalized.includes("fastshop")) {
+    return 0.05;
+  }
+  return 0.05;
 }
 
 export interface SearchResponse {
@@ -77,17 +112,17 @@ async function fetchSerpApiOffers(
                 ? store.extracted_price
                 : parseFloat(String(store.total || store.price || "0").replace(/[^0-9,.]/g, "").replace(",", "."));
 
-            const pixDiscountRate = 0.08;
-            const pixPrice = Math.round(rawPrice * (1 - pixDiscountRate) * 100) / 100;
+            const storeName = store.name || "Loja Parceira";
             const isFreeShipping = store.details_and_offers?.some((d: string) => d.toLowerCase().includes("grátis")) ?? false;
 
             return {
               id: `store-${idx}`,
-              storeName: store.name || "Loja Parceira",
+              storeName,
               productTitle: store.title || immersiveData.product_results?.title || mainProduct.title,
               imageUrl: immersiveData.product_results?.thumbnails?.[0] || mainProduct.thumbnail || "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&q=80",
               showcasePrice: rawPrice,
-              pixPrice: pixPrice,
+              pixPrice: rawPrice,
+              pixDiscountPercent: 0,
               link: store.link || mainProduct.product_link || "#",
               inStock: true,
               freeShipping: isFreeShipping,
@@ -108,9 +143,6 @@ async function fetchSerpApiOffers(
         ? item.extracted_price
         : parseFloat(String(item.price || "0").replace(/[^0-9,.]/g, "").replace(",", "."));
 
-    const pixDiscountRate = 0.08; // Média de 8% de desconto no PIX
-    const pixPrice = Math.round(rawPrice * (1 - pixDiscountRate) * 100) / 100;
-
     const storeName = item.source || "Loja Online Confiável";
     const productTitle = item.title;
     const originalLink = item.link || item.product_link || "#";
@@ -121,7 +153,8 @@ async function fetchSerpApiOffers(
       productTitle,
       imageUrl: item.thumbnail || "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&q=80",
       showcasePrice: rawPrice,
-      pixPrice: pixPrice,
+      pixPrice: rawPrice,
+      pixDiscountPercent: 0,
       link: originalLink,
       inStock: true,
       deliveryDays: 2 + (idx % 3),
@@ -192,8 +225,7 @@ function generateRealisticOffers(
   ];
 
   return retailers.map((ret, idx) => {
-    const showcase = Math.round(referencePrice * (ret.discountFactor + 0.05) * 100) / 100;
-    const pix = Math.round(referencePrice * ret.discountFactor * 100) / 100;
+    const price = Math.round(referencePrice * ret.discountFactor * 100) / 100;
 
     return {
       id: `offer-${idx + 1}`,
@@ -201,8 +233,9 @@ function generateRealisticOffers(
       storeBadge: ret.badge,
       productTitle: `${query} - Original com Nota Fiscal`,
       imageUrl: ret.image,
-      showcasePrice: showcase,
-      pixPrice: pix,
+      showcasePrice: price,
+      pixPrice: price,
+      pixDiscountPercent: 0,
       link: ret.link,
       inStock: true,
       deliveryDays: ret.days,

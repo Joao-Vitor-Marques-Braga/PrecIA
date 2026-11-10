@@ -1,20 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import {
   Sparkles,
-  Camera,
   Bot,
   User,
-  AlertCircle,
   Loader2,
-  RefreshCw,
   ShoppingBag,
-  Store,
-  ChevronRight,
-  Bell,
-  CheckCircle2,
 } from "lucide-react";
 import { HeaderCep } from "@/components/header-cep";
 import { ChatInput } from "@/components/chat-input";
@@ -45,7 +37,7 @@ export default function HomePage() {
       id: "welcome-1",
       sender: "assistant",
       type: "text",
-      text: "Olá! Sou o PrecIA, seu comparador inteligente omnichannel com IA. Fotografe a etiqueta na gôndola ou digite o modelo do produto para achar o menor preço em tempo real e ativar alertas de preço!",
+      text: "Olá! Sou o PrecIA, seu comparador inteligente omnichannel. Fotografe a etiqueta na gôndola da loja física ou digite o modelo do produto para descobrir o menor preço em tempo real e ativar alertas com IA!",
       timestamp: new Date(),
     },
   ]);
@@ -53,7 +45,7 @@ export default function HomePage() {
   const [pendingVisionData, setPendingVisionData] = useState<VisionLLMOutput | null>(null);
   const [isConfidenceModalOpen, setIsConfidenceModalOpen] = useState(false);
 
-  // Estados da Sprint 2: Auth, Monitoramento e Afiliados
+  // Estados de Auth, Monitoramento e Afiliados
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isMonitorModalOpen, setIsMonitorModalOpen] = useState(false);
@@ -201,7 +193,7 @@ export default function HomePage() {
         id: visionStatusId,
         sender: "assistant",
         type: "status",
-        text: "Lendo etiqueta com Visão Computacional (IA)...",
+        text: "Analisando etiqueta com IA de Visão Computacional...",
         timestamp: new Date(),
       };
 
@@ -236,8 +228,8 @@ export default function HomePage() {
               id: `vision-success-${Date.now()}`,
               sender: "assistant",
               type: "text",
-              text: `✅ Etiqueta reconhecida (${Math.round(visionResult.confidence_score * 100)}% de precisão): **${visionResult.full_query}**${
-                visionResult.detected_price ? ` (Preço na loja: R$ ${visionResult.detected_price.toFixed(2)})` : ""
+              text: `✅ Etiqueta reconhecida com sucesso: **${visionResult.full_query}**${
+                visionResult.detected_price ? ` (Preço na gôndola física: R$ ${visionResult.detected_price.toFixed(2)})` : ""
               }`,
               timestamp: new Date(),
             },
@@ -267,9 +259,6 @@ export default function HomePage() {
     reader.readAsDataURL(file);
   };
 
-  /**
-   * Dispara abertura do modal de monitoramento
-   */
   const handleOpenMonitor = (offer: StoreOffer) => {
     setSelectedOfferForMonitor(offer);
     setIsMonitorModalOpen(true);
@@ -283,15 +272,15 @@ export default function HomePage() {
         id: `monitor-success-${Date.now()}`,
         sender: "assistant",
         type: "text",
-        text: `🔔 Alerta de Preço Ativado com Sucesso!\nProduto: **${item.product_name}** na **${item.store_name}**.\nPreço-alvo definido: **R$ ${Number(item.target_price).toFixed(2)}**. Avisaremos você assim que o valor for atingido!`,
+        text: `🔔 Alerta de Preço Ativado com Sucesso!\nProduto: **${item.product_name}** na **${item.store_name}**.\nPreço-alvo: **R$ ${Number(item.target_price).toFixed(2)}**. Avisaremos você assim que o valor for atingido!`,
         timestamp: new Date(),
       },
     ]);
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#090d16] pb-28">
-      {/* Header com CEP, contagem de alertas e Auth */}
+    <main className="min-h-screen flex flex-col bg-background text-foreground pb-32 transition-colors">
+      {/* Header com CEP, Modo Claro/Escuro, contagem de alertas e Auth */}
       <HeaderCep
         cep={cep}
         onCepChange={setCep}
@@ -303,46 +292,72 @@ export default function HomePage() {
       />
 
       {/* Área Central de Mensagens */}
-      <div className="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 py-4 space-y-4">
+      <div className="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-5 py-6 space-y-5">
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex gap-2.5 sm:gap-3 ${
+            className={`flex gap-3 ${
               msg.sender === "user" ? "justify-end" : "justify-start"
             }`}
           >
             {msg.sender === "assistant" && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mt-1">
-                <Bot className="w-4 h-4" />
+              <div className="flex-shrink-0 w-8 h-8 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-sm mt-1">
+                <Bot className="w-4 h-4 text-background" />
               </div>
             )}
 
             <div
-              className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 text-sm leading-relaxed transition-all ${
+              className={`max-w-[90%] sm:max-w-[82%] rounded-3xl p-4 sm:p-5 text-sm leading-relaxed transition-all ${
                 msg.sender === "user"
-                  ? "bg-indigo-600 text-white rounded-tr-none shadow-md shadow-indigo-600/20"
-                  : "glass-card text-slate-200 rounded-tl-none border-slate-800"
+                  ? "bg-foreground text-background rounded-tr-sm shadow-md font-medium"
+                  : "bg-card text-foreground rounded-tl-sm border border-border/80 shadow-soft"
               }`}
             >
               {msg.type === "image" && msg.imageUrl && (
-                <div className="mb-2 overflow-hidden rounded-xl border border-white/20">
+                <div className="mb-2.5 overflow-hidden rounded-2xl border border-border/70 shadow-sm">
                   <img
                     src={msg.imageUrl}
-                    alt="Foto da etiqueta"
-                    className="w-full max-h-60 object-cover"
+                    alt="Foto da etiqueta capturada"
+                    className="w-full max-h-64 object-cover"
                   />
                 </div>
               )}
 
               {msg.type === "status" && (
-                <div className="flex items-center gap-2 text-indigo-300 font-medium animate-pulse">
-                  <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+                <div className="flex items-center gap-2.5 text-foreground font-semibold animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                   <span>{msg.text}</span>
                 </div>
               )}
 
               {msg.type === "text" && (
-                <p className="whitespace-pre-wrap">{msg.text}</p>
+                <div>
+                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  {msg.id === "welcome-1" && messages.length === 1 && (
+                    <div className="mt-3.5 pt-3 border-t border-border/60">
+                      <span className="text-[11px] font-semibold text-muted-foreground block mb-2">
+                        Ou toque para pesquisar um produto popular:
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          "Smart TV 55 LG QNED",
+                          "iPhone 15 128GB",
+                          "PlayStation 5 Slim",
+                          "Geladeira Frost Free",
+                        ].map((quickQuery) => (
+                          <button
+                            key={quickQuery}
+                            type="button"
+                            onClick={() => handleSendMessage(quickQuery)}
+                            className="text-xs px-3 py-1.5 rounded-xl bg-secondary/80 hover:bg-foreground hover:text-background text-foreground font-medium border border-border/80 transition-all shadow-sm active:scale-95"
+                          >
+                            {quickQuery}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
 
               {msg.type === "search_result" && msg.searchData && (
@@ -354,16 +369,16 @@ export default function HomePage() {
                   />
 
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                      <ShoppingBag className="w-3.5 h-3.5 text-indigo-400" />
-                      Ofertas com Link Seguro de Afiliado ({msg.searchData.totalFound})
+                    <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <ShoppingBag className="w-3.5 h-3.5 text-foreground" />
+                      Ofertas Verificadas ({msg.searchData.totalFound})
                     </span>
-                    <span className="text-[11px] text-slate-400">
-                      Frete p/ {msg.searchData.cep}
+                    <span className="text-[11px] text-muted-foreground font-medium">
+                      Frete calculado p/ {msg.searchData.cep}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {msg.searchData.offers.map((offer) => (
                       <ProductCard
                         key={offer.id}
@@ -376,8 +391,8 @@ export default function HomePage() {
               )}
 
               <div
-                className={`text-[10px] mt-1.5 text-right ${
-                  msg.sender === "user" ? "text-indigo-200" : "text-slate-400"
+                className={`text-[10px] mt-2 text-right ${
+                  msg.sender === "user" ? "text-background/70" : "text-muted-foreground"
                 }`}
               >
                 {new Intl.DateTimeFormat("pt-BR", {
@@ -388,7 +403,7 @@ export default function HomePage() {
             </div>
 
             {msg.sender === "user" && (
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 mt-1">
+              <div className="flex-shrink-0 w-8 h-8 rounded-2xl bg-secondary border border-border text-foreground flex items-center justify-center mt-1 shadow-sm font-semibold">
                 <User className="w-4 h-4" />
               </div>
             )}
@@ -431,7 +446,7 @@ export default function HomePage() {
         onCountUpdate={setMonitoredCount}
       />
 
-      {/* Modal de Autenticação Supabase */}
+      {/* Modal de Autenticação */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

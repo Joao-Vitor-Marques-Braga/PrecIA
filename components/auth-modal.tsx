@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { User, Lock, Mail, X, Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
+import { User, Lock, Mail, X, Loader2, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -42,10 +44,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
         });
 
         if (error) throw error;
-        setSuccessMsg("Conta criada com sucesso! Verifique seu e-mail se a confirmação estiver ativada.");
+        setSuccessMsg("Conta criada com sucesso!");
         if (data.user) {
           onAuthSuccess(data.user);
-          setTimeout(onClose, 1200);
+          setTimeout(onClose, 1000);
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -61,7 +63,6 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
         }
       }
     } catch (err: any) {
-      // Fallback amigável se Supabase não tiver credenciais configuradas no .env
       if (err?.message?.includes("mock") || err?.message?.includes("fetch failed") || !process.env.NEXT_PUBLIC_SUPABASE_URL) {
         const demoUser = {
           id: "demo-user-123",
@@ -90,41 +91,46 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-indigo-950/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-sm bg-card border border-border/80 rounded-3xl p-6 shadow-2xl transition-all">
         {/* Topo */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
-              <ShieldCheck className="w-5 h-5" />
+        <div className="flex items-start justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-md">
+              <ShieldCheck className="w-5 h-5 text-background" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-100 text-base">
+              <h3 className="font-extrabold text-foreground text-base tracking-tight">
                 {isSignUp ? "Criar Conta PrecIA" : "Entrar no PrecIA"}
               </h3>
-              <p className="text-[11px] text-slate-400">
-                Sincronize alertas e ofertas salvas
+              <p className="text-[11px] text-muted-foreground">
+                Sincronize alertas e histórico inteligente
               </p>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+            className="rounded-full text-muted-foreground hover:text-foreground"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
-        {/* Abas Entrar / Cadastrar */}
-        <div className="grid grid-cols-2 p-1 bg-slate-950 rounded-xl mb-4 text-xs font-semibold text-center border border-slate-800">
+        {/* Abas Entrar / Cadastrar Arredondadas */}
+        <div className="grid grid-cols-2 p-1 bg-secondary/60 rounded-2xl mb-4 text-xs font-semibold text-center border border-border/60">
           <button
             type="button"
             onClick={() => {
               setIsSignUp(false);
               setErrorMsg("");
+              setSuccessMsg("");
             }}
-            className={`py-1.5 rounded-lg transition-colors ${
-              !isSignUp ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"
+            className={`py-2 rounded-xl transition-all font-semibold ${
+              !isSignUp
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Entrar
@@ -134,87 +140,92 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
             onClick={() => {
               setIsSignUp(true);
               setErrorMsg("");
+              setSuccessMsg("");
             }}
-            className={`py-1.5 rounded-lg transition-colors ${
-              isSignUp ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-slate-200"
+            className={`py-2 rounded-xl transition-all font-semibold ${
+              isSignUp
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Cadastrar
           </button>
         </div>
 
+        {/* Feedback visual */}
+        {errorMsg && (
+          <div className="p-3 mb-3.5 rounded-2xl bg-danger/10 border border-danger/30 text-danger text-xs font-medium">
+            {errorMsg}
+          </div>
+        )}
+        {successMsg && (
+          <div className="p-3 mb-3.5 rounded-2xl bg-success-subtle border border-success-border text-success text-xs font-bold">
+            {successMsg}
+          </div>
+        )}
+
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-3">
           {isSignUp && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-foreground mb-1">
                 Nome Completo:
               </label>
-              <div className="relative flex items-center">
-                <input
+              <div className="relative">
+                <User className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
+                <Input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Seu nome"
                   required={isSignUp}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                  className="pl-10 text-xs"
                 />
-                <User className="w-3.5 h-3.5 text-slate-500 absolute left-2.5" />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-foreground mb-1">
               E-mail:
             </label>
-            <div className="relative flex items-center">
-              <input
+            <div className="relative">
+              <Mail className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
+              <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
+                placeholder="seu.email@exemplo.com"
                 required
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                className="pl-10 text-xs"
               />
-              <Mail className="w-3.5 h-3.5 text-slate-500 absolute left-2.5" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-foreground mb-1">
               Senha:
             </label>
-            <div className="relative flex items-center">
-              <input
+            <div className="relative">
+              <Lock className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
+              <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="••••••••"
                 required
                 minLength={6}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                className="pl-10 text-xs"
               />
-              <Lock className="w-3.5 h-3.5 text-slate-500 absolute left-2.5" />
             </div>
           </div>
 
-          {errorMsg && (
-            <p className="text-[11px] text-rose-400 bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
-              {errorMsg}
-            </p>
-          )}
-
-          {successMsg && (
-            <p className="text-[11px] text-emerald-400 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-              {successMsg}
-            </p>
-          )}
-
-          <button
+          <Button
             type="submit"
+            variant="default"
+            size="default"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-colors disabled:opacity-50"
+            className="w-full rounded-2xl font-bold mt-2 shadow-md"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -223,17 +234,21 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
             ) : (
               "Entrar"
             )}
-          </button>
-
-          {/* Atalho Demo */}
-          <button
-            type="button"
-            onClick={handleDemoLogin}
-            className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium transition-colors"
-          >
-            Acesso Rápido de Demonstração (1-Clique)
-          </button>
+          </Button>
         </form>
+
+        {/* Atalho Demo */}
+        <div className="mt-4 pt-3.5 border-t border-border/80 text-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleDemoLogin}
+            className="text-xs text-muted-foreground hover:text-foreground font-semibold rounded-xl"
+          >
+            Acessar com Perfil Demo Rápido
+          </Button>
+        </div>
       </div>
     </div>
   );

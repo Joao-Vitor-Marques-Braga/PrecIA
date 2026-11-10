@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Camera, Send, Upload, Loader2 } from "lucide-react";
+import { Camera, Send, Upload, Loader2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ChatInputProps {
   onSendMessage: (text: string) => void;
@@ -41,7 +42,6 @@ export function ChatInput({
     if (files && files.length > 0) {
       const file = files[0];
       onSendImage(file);
-      // Limpa input para permitir selecionar a mesma foto se necessário
       e.target.value = "";
     }
   };
@@ -59,89 +59,99 @@ export function ChatInput({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 glass-panel border-t border-slate-800/90 px-3 py-2.5 sm:px-4 sm:py-3">
-      <div className="max-w-3xl mx-auto flex flex-col gap-1.5">
-        {/* Hidden inputs para câmera e galeria */}
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          capture="environment"
-          onChange={handleFileChange}
-          className="hidden"
-          id="camera-capture-input"
-        />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          onChange={handleFileChange}
-          className="hidden"
-          id="file-upload-input"
-        />
+    <div className="fixed bottom-0 left-0 right-0 z-30 px-3 py-3 sm:px-6 sm:py-4 pointer-events-none">
+      <div className="max-w-3xl mx-auto pointer-events-auto">
+        <div className="glass-floating rounded-3xl p-2 sm:p-2.5 transition-all">
+          {/* Inputs ocultos de câmera e galeria */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            onChange={handleFileChange}
+            className="hidden"
+            id="camera-capture-input"
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={handleFileChange}
+            className="hidden"
+            id="file-upload-input"
+          />
 
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
-          {/* Botão Câmera Nativa (Mobile Primeiro) */}
-          <button
-            type="button"
-            onClick={triggerCamera}
-            disabled={isLoading || disabled}
-            title="Tirar foto da etiqueta na loja física"
-            className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50 disabled:pointer-events-none"
-          >
-            <Camera className="w-5 h-5" />
-          </button>
-
-          {/* Botão Galeria/Upload Secundário */}
-          <button
-            type="button"
-            onClick={triggerFileUpload}
-            disabled={isLoading || disabled}
-            title="Carregar imagem da galeria"
-            className="hidden sm:flex flex-shrink-0 items-center justify-center w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all disabled:opacity-50"
-          >
-            <Upload className="w-4 h-4" />
-          </button>
-
-          {/* Campo de Texto Principal */}
-          <div className="relative flex-1 flex items-center">
-            <input
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
-              onKeyDown={handleKeyDown}
-              placeholder="Digite o modelo (ex: TV LG 75 QNED70)..."
+          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            {/* Botão Câmera Primário */}
+            <Button
+              type="button"
+              variant="default"
+              size="icon"
+              onClick={triggerCamera}
               disabled={isLoading || disabled}
-              className="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl pl-3.5 pr-14 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-50"
-            />
-            {/* Indicador de limite de caracteres */}
-            <span
-              className={`absolute right-3 text-[10px] tabular-nums font-mono ${
-                text.length >= MAX_CHARS ? "text-rose-400 font-bold" : "text-slate-500"
-              }`}
+              title="Fotografar etiqueta na gôndola"
+              className="w-11 h-11 rounded-2xl flex-shrink-0 shadow-md font-bold"
             >
-              {text.length}/{MAX_CHARS}
+              <Camera className="w-5 h-5" />
+            </Button>
+
+            {/* Botão Upload Imagem */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={triggerFileUpload}
+              disabled={isLoading || disabled}
+              title="Carregar foto da galeria"
+              className="hidden sm:inline-flex w-11 h-11 rounded-2xl flex-shrink-0 border-border/80"
+            >
+              <Upload className="w-4 h-4 text-foreground" />
+            </Button>
+
+            {/* Input de Texto */}
+            <div className="relative flex-1 flex items-center">
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value.slice(0, MAX_CHARS))}
+                onKeyDown={handleKeyDown}
+                placeholder="Fotografe a etiqueta ou digite o modelo (ex: TV LG 75 QNED)..."
+                disabled={isLoading || disabled}
+                className="w-full h-11 bg-secondary/50 dark:bg-muted/40 border border-border/80 rounded-2xl pl-4 pr-14 py-2.5 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20 focus:border-foreground/40 transition-all"
+              />
+              <span
+                className={`absolute right-3.5 text-[10px] tabular-nums font-mono font-medium ${
+                  text.length >= MAX_CHARS ? "text-danger font-bold" : "text-muted-foreground/70"
+                }`}
+              >
+                {text.length}/{MAX_CHARS}
+              </span>
+            </div>
+
+            {/* Botão de Enviar */}
+            <Button
+              type="submit"
+              variant={text.trim() ? "default" : "secondary"}
+              size="icon"
+              disabled={!text.trim() || isLoading || disabled}
+              className="w-11 h-11 rounded-2xl flex-shrink-0 transition-transform active:scale-95"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+            </Button>
+          </form>
+
+          {/* Dica discreta */}
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground px-3 pt-1.5 font-medium">
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-muted-foreground" />
+              Tire uma foto clara da etiqueta na gôndola para leitura instantânea por IA
             </span>
+            <span className="hidden sm:inline">Pressione Enter ↵</span>
           </div>
-
-          {/* Botão de Envio de Texto */}
-          <button
-            type="submit"
-            disabled={!text.trim() || isLoading || disabled}
-            className="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-800 hover:bg-indigo-600 active:scale-95 text-slate-200 hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
-            ) : (
-              <Send className="w-4 h-4" />
-            )}
-          </button>
-        </form>
-
-        {/* Dica discreta no rodapé */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
-          <span>Dica: Fotografe a etiqueta de preço na gôndola para leitura instantânea por IA</span>
-          <span className="hidden sm:inline">Ctrl+Enter para enviar</span>
         </div>
       </div>
     </div>

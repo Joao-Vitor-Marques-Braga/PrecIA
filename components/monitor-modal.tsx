@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { BellRing, X, Check, Sparkles, Loader2, Phone } from "lucide-react";
 import type { StoreOffer } from "@/app/api/search/route";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 interface MonitorModalProps {
   isOpen: boolean;
@@ -24,12 +27,10 @@ export function MonitorModal({
 
   useEffect(() => {
     if (offer) {
-      // Sugestão padrão: 10% abaixo do preço atual
       const suggested = Math.round(offer.effectivePrice * 0.9);
       setTargetPrice(String(suggested));
       setErrorMsg("");
 
-      // Carrega whatsapp salvo se existir
       const savedPhone = localStorage.getItem("precia_user_phone");
       if (savedPhone) setWhatsapp(savedPhone);
     }
@@ -95,42 +96,51 @@ export function MonitorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-6 shadow-2xl shadow-indigo-950/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md bg-card border border-border/80 rounded-3xl p-6 shadow-2xl transition-all">
         {/* Cabeçalho */}
         <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400">
-              <BellRing className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-foreground text-background flex items-center justify-center shadow-md">
+              <BellRing className="w-5 h-5 text-background" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-100 text-base">
+              <h3 className="font-bold text-foreground text-base sm:text-lg tracking-tight">
                 Criar Alerta de Preço
               </h3>
-              <p className="text-xs text-slate-400">
-                Avisaremos quando o produto atingir sua meta.
+              <p className="text-xs text-muted-foreground">
+                Avisaremos você assim que o produto atingir sua meta.
               </p>
             </div>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+            className="rounded-full text-muted-foreground hover:text-foreground"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Resumo da Oferta Atual */}
-        <div className="bg-slate-950/60 rounded-2xl p-3 border border-slate-800/80 mb-4 flex items-center justify-between text-xs">
-          <div>
-            <span className="text-[10px] text-slate-400 block">{offer.storeName}</span>
-            <span className="font-medium text-slate-200 line-clamp-1 max-w-[200px]">
+        <div className="bg-secondary/60 dark:bg-muted/40 rounded-2xl p-3 border border-border/70 mb-4 flex items-center gap-3 text-xs">
+          {offer.imageUrl && (
+            <div className="w-12 h-12 rounded-xl bg-card p-1 flex-shrink-0 border border-border/60 overflow-hidden flex items-center justify-center">
+              <img src={offer.imageUrl} alt={offer.productTitle} className="w-full h-full object-contain" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <span className="text-[10px] text-muted-foreground font-semibold uppercase block">
+              {offer.storeName}
+            </span>
+            <span className="font-semibold text-foreground line-clamp-1">
               {offer.productTitle}
             </span>
           </div>
-          <div className="text-right">
-            <span className="text-[10px] text-slate-400 block">Preço Atual:</span>
-            <span className="font-bold text-slate-100">
+          <div className="text-right flex-shrink-0">
+            <span className="text-[10px] text-muted-foreground block">Preço Atual</span>
+            <span className="font-extrabold text-foreground text-sm">
               {offer.effectivePrice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
             </span>
           </div>
@@ -138,80 +148,98 @@ export function MonitorModal({
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Preço Alvo */}
+          {errorMsg && (
+            <div className="p-3 rounded-2xl bg-danger/10 border border-danger/30 text-danger text-xs font-medium">
+              {errorMsg}
+            </div>
+          )}
+
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Preço-Alvo Desejado (R$):
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
+              Seu Preço-Alvo Desejado (R$):
             </label>
-            <input
+            <Input
               type="number"
               step="0.01"
               value={targetPrice}
               onChange={(e) => setTargetPrice(e.target.value)}
-              placeholder="Ex: 3800.00"
+              placeholder="Ex: 899.90"
               required
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-emerald-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              className="text-base font-bold font-mono"
             />
-            {/* Atalhos rápidos de desconto */}
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-[10px] text-slate-400">Metas Rápidas:</span>
+          </div>
+
+          {/* Atalhos de Desconto */}
+          <div>
+            <span className="text-[11px] text-muted-foreground block mb-1.5 font-medium">
+              Ou escolha um desconto rápido:
+            </span>
+            <div className="grid grid-cols-3 gap-2">
               {[5, 10, 15].map((pct) => (
-                <button
+                <Button
                   key={pct}
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleQuickDiscount(pct)}
-                  className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] font-semibold text-indigo-300 border border-slate-700 transition-colors"
+                  className="rounded-xl text-xs font-semibold border-border hover:bg-secondary"
                 >
                   -{pct}%
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
-          {/* WhatsApp / Notificação */}
+          {/* Notificação por WhatsApp */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-              <Phone className="w-3.5 h-3.5 text-emerald-400" />
-              WhatsApp para Alerta Instantâneo (Opcional):
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
+              WhatsApp para Alerta Instantâneo (opcional):
             </label>
-            <input
-              type="tel"
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              placeholder="(11) 99999-9999"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-            />
+            <div className="relative">
+              <Phone className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
+              <Input
+                type="tel"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                placeholder="(11) 98765-4321"
+                className="pl-10"
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              Dispararemos uma mensagem assim que o preço cair para sua meta.
+            </p>
           </div>
 
-          {errorMsg && (
-            <p className="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20">
-              {errorMsg}
-            </p>
-          )}
-
-          {/* Ações */}
-          <div className="flex items-center gap-2 pt-2">
-            <button
+          <div className="pt-2 flex items-center justify-end gap-2">
+            <Button
               type="button"
+              variant="outline"
+              size="default"
               onClick={onClose}
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+              disabled={isSubmitting}
+              className="rounded-2xl"
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
+              variant="success"
+              size="default"
               disabled={isSubmitting}
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50"
+              className="rounded-2xl gap-2 font-bold shadow-md"
             >
               {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Salvando...
+                </>
               ) : (
                 <>
                   <Check className="w-4 h-4" />
-                  <span>Ativar Monitoramento</span>
+                  Ativar Radar
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
